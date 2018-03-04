@@ -1,4 +1,4 @@
-!/usr/bin/php
+#!/usr/bin/php
 <?php  
 // This php program reads data from a growatt inverter
 // 
@@ -70,6 +70,7 @@ while(1)
         $writemask = NULL;
         $errormask = NULL;
         $nroffd = stream_select($readmask, $writemask, $errormask, 1);
+        $mqtt->proc();
         if ($nroffd == 0)
         {
               if ($sendtimer == 0)
