@@ -26,7 +26,16 @@ if (($tmp = $iniarray[$devicename]["mqttpassword"]) != "") $password = $tmp;
 
 
 $mqtt = new phpMQTT($server, $port, $client_id);
-$mqtt->connect(true, NULL, $username, $password);
+
+
+$will = array (
+	"topic" => $mqttTopicPrefix."status",
+	"content" => "offline",
+	"qos" => 0,
+	"retain" => 1
+);
+$mqtt->connect(true, $will, $username, $password);
+publishmqtt("status","online" ,0,1);
 
 
 echo "Setting Serial Port Device ".$serialdevice."...\n";
@@ -84,6 +93,8 @@ while(1)
                 }
                 $TxBuffer .= sprintf ("%c%c", $wStringSum >> 8, $wStringSum & 0xFF);
                 echo "Sending: '".bin2hex($TxBuffer)."'\n" ;
+                
+                publishmqtt("status","quering" ,0,1);
 
                 $serial->sendMessage($TxBuffer, 2);
                 $sendtimer = 10;
@@ -135,6 +146,7 @@ while(1)
               { 
                 publishmqtt("grid/today/kwh", number_format((ord($message[13]) << 8 | ord($message[14]))/10,1,'.', ''));
                 publishmqtt("grid/total/kwh", number_format((ord($message[15]) << 24 | ord($message[16]) << 16 | ord($message[17]) << 8 | ord($message[18])) / 10,1,'.', ''));
+                publishmqtt("status", "ready", 0, 1);
               }
             }
           }
